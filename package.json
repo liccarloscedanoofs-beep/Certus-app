@@ -1,0 +1,10 @@
+{
+  "name": "certus-legal-ai",
+  "version": "1.0.0",
+  "description": "Certus - IA para Abogados",
+  "private": true,
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'Static site'"
+  }
+}
