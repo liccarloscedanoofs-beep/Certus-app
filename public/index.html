@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Certus — IA para Abogados</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#08080F;--sidebar:#0D0D16;--surface:#111119;--card:#161622;
+  --border:rgba(255,255,255,0.07);--accent:#C9A84C;--accent-dim:rgba(201,168,76,0.1);
+  --accent-border:rgba(201,168,76,0.22);--violet:#7B6CF6;--violet-dim:rgba(123,108,246,0.12);
+  --teal:#4EC9C0;--red:#F06A6A;--red-dim:rgba(240,106,106,0.09);
+  --green:#5ECC9A;--text:#DCDCEC;--muted:#5C5C78;--white:#FFFFFF;
+}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+.glow{position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 70% 50% at 20% 10%,rgba(123,108,246,0.1) 0%,transparent 60%),
+             radial-gradient(ellipse 50% 40% at 80% 80%,rgba(201,168,76,0.07) 0%,transparent 55%)}
+
+/* ===== LANDING ===== */
+#landing{position:relative;z-index:1;display:block}
+.wrap{max-width:660px;margin:0 auto;padding:0 20px 60px}
+
+.badge-row{display:flex;justify-content:center;padding:44px 0 28px}
+.badge{display:inline-flex;align-items:center;gap:8px;background:rgba(123,108,246,0.15);border:1px solid rgba(123,108,246,0.3);border-radius:999px;padding:8px 20px;font-size:11px;font-weight:700;letter-spacing:.1em;color:#8B85FF;text-transform:uppercase}
+.badge-dot{width:6px;height:6px;border-radius:50%;background:#8B85FF;animation:pulse 2s infinite}
+
+.hero{text-align:center;padding-bottom:40px}
+.hero-emoji{font-size:52px;display:block;margin-bottom:18px;filter:drop-shadow(0 0 24px rgba(201,168,76,0.5))}
+.hero h1{margin:0;line-height:1.05;letter-spacing:-.03em}
+.hero h1 .l1{display:block;font-size:clamp(32px,7vw,52px);font-weight:900;color:#fff}
+.hero h1 .l2{display:block;font-size:clamp(32px,7vw,52px);font-weight:900;background:linear-gradient(135deg,#C9A84C,#8B85FF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero p{font-size:15px;color:var(--muted);max-width:460px;margin:22px auto 0;line-height:1.75}
+.hero p strong{color:#fff;font-weight:600}
+.sprint-tag{display:inline-flex;align-items:center;gap:10px;margin-top:26px;background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:12px;padding:12px 22px;font-size:13px;font-weight:600;color:var(--accent)}
+
+.div{display:flex;align-items:center;gap:14px;margin:36px 0 20px}
+.div-line{flex:1;height:1px;background:var(--border)}
+.div-label{font-size:10px;font-weight:700;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;white-space:nowrap}
+
+/* Tools grid */
+.tools-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.tool-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:22px;cursor:pointer;transition:all .2s;text-decoration:none;display:block}
+.tool-card:hover{border-color:var(--accent-border);background:var(--accent-dim);transform:translateY(-2px)}
+.tool-icon{font-size:28px;margin-bottom:12px;display:block}
+.tool-name{font-size:15px;font-weight:700;color:#fff;margin-bottom:4px}
+.tool-desc{font-size:12px;color:var(--muted);line-height:1.5}
+.tool-arrow{font-size:11px;color:var(--accent);margin-top:10px;font-weight:600}
+
+/* Modules */
+.modules{display:flex;flex-direction:column;gap:10px}
+.module{display:flex;align-items:flex-start;gap:14px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 18px;transition:all .15s}
+.module:hover{border-color:rgba(123,108,246,.3)}
+.mod-num{flex-shrink:0;width:34px;height:34px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#7B6CF6,#4B44CC);border-radius:9px;font-size:13px;font-weight:800;color:#fff;margin-top:1px}
+.mod-title{font-size:14px;font-weight:700;color:#fff;margin-bottom:3px}
+.mod-desc{font-size:13px;color:var(--muted);line-height:1.55}
+
+/* Hackathon */
+.hackathon{background:linear-gradient(135deg,rgba(201,168,76,.12),rgba(123,108,246,.08));border:1px solid rgba(201,168,76,.2);border-radius:18px;padding:26px 22px;text-align:center;margin-top:10px}
+.hackathon-title{font-size:17px;font-weight:800;color:var(--accent);margin-bottom:8px}
+.hackathon-desc{font-size:13px;color:var(--muted);line-height:1.65}
+
+/* Audience */
+.audience-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.audience-item{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:16px 10px;text-align:center}
+.audience-emoji{font-size:24px;display:block;margin-bottom:8px}
+.audience-label{font-size:12px;font-weight:600;color:#D0D0E0;line-height:1.4}
+
+/* Benefits */
+.benefits{display:flex;flex-direction:column;gap:10px}
+.benefit{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--border);border-radius:13px;padding:14px 16px}
+.benefit-icon{width:36px;height:36px;flex-shrink:0;background:rgba(123,108,246,.15);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px}
+.benefit-text{font-size:13.5px;font-weight:500;color:#D8D8F0;line-height:1.4}
+
+/* CTA */
+.cta{background:linear-gradient(135deg,rgba(123,108,246,.15),rgba(201,168,76,.08));border:1px solid rgba(123,108,246,.25);border-radius:22px;padding:34px 26px;text-align:center;margin-top:44px}
+.cta h2{font-size:22px;font-weight:800;margin-bottom:10px}
+.cta p{font-size:14px;color:var(--muted);margin-bottom:26px;line-height:1.6}
+.cta-btn{display:inline-block;background:linear-gradient(135deg,#7B6CF6,#4B44CC);color:#fff;font-size:15px;font-weight:700;padding:15px 38px;border-radius:13px;text-decoration:none;letter-spacing:-.01em;box-shadow:0 8px 28px rgba(123,108,246,.35);transition:all .2s;cursor:pointer;border:none}
+.cta-btn:hover{transform:translateY(-2px);box-shadow:0 12px 36px rgba(123,108,246,.5)}
+.cta-note{margin-top:14px;font-size:12px;color:var(--muted)}
+.footer{text-align:center;padding:28px 0 0;font-size:12px;color:rgba(255,255,255,.18)}
+
+/* ===== APP ===== */
+#app{display:none;height:100vh;flex-direction:row}
+.sidebar{width:192px;background:var(--sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
+.sidebar-logo{padding:20px 16px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px}
+.logo-icon{width:34px;height:34px;border-radius:10px;background:var(--accent-dim);border:1px solid var(--accent-border);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.logo-name{font-size:15px;font-weight:800;color:#fff;letter-spacing:-.02em}
+.logo-sub{font-size:10px;color:var(--accent);font-weight:600}
+.sidebar-nav{padding:14px 8px;flex:1}
+.nav-label{font-size:10px;font-weight:700;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin-bottom:8px;padding:0 4px}
+.nav-btn{display:flex;align-items:center;gap:9px;width:100%;padding:10px;border-radius:10px;border:none;cursor:pointer;background:transparent;margin-bottom:3px;transition:all .15s;text-align:left}
+.nav-btn:hover{background:rgba(255,255,255,.04)}
+.nav-btn.active{background:var(--accent-dim)}
+.nav-icon{font-size:17px;flex-shrink:0}
+.nav-title{font-size:12.5px;font-weight:600;color:#fff}
+.nav-btn.active .nav-title{color:var(--accent)}
+.nav-sub{font-size:10px;color:var(--muted)}
+.sidebar-footer{padding:12px 14px;border-top:1px solid var(--border);font-size:10px;color:var(--muted);line-height:1.6}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{padding:14px 20px;border-bottom:1px solid var(--border);background:var(--sidebar);display:flex;align-items:center;gap:12px;flex-shrink:0}
+.topbar-icon{font-size:20px}
+.topbar-title{font-size:15px;font-weight:700;color:#fff}
+.topbar-sub{font-size:11px;color:var(--muted)}
+.status{margin-left:auto;display:flex;align-items:center;gap:6px}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+.status-label{font-size:11px;color:var(--green);font-weight:600}
+.tool-area{flex:1;overflow:hidden;display:flex;flex-direction:column}
+
+/* ===== CHAT ===== */
+.chat-messages{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:12px}
+.msg-row{display:flex;gap:8px;align-items:flex-start}
+.msg-row.user{justify-content:flex-end}
+.msg-avatar{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.msg-avatar.ai{background:var(--accent-dim);border:1px solid var(--accent-border)}
+.msg-avatar.user{background:var(--violet-dim);border:1px solid rgba(123,108,246,.22)}
+.msg-bubble{max-width:78%;padding:10px 14px;font-size:13.5px;line-height:1.7;color:var(--text)}
+.msg-bubble.ai{background:var(--card);border:1px solid var(--border);border-radius:16px 16px 16px 4px}
+.msg-bubble.user{background:var(--violet-dim);border:1px solid rgba(123,108,246,.22);border-radius:16px 16px 4px 16px}
+.typing{display:flex;gap:5px;align-items:center;padding:12px 16px;background:var(--card);border:1px solid var(--border);border-radius:16px 16px 16px 4px}
+.typing-dot{width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.chat-input-area{padding:12px 16px;border-top:1px solid var(--border);background:var(--sidebar);flex-shrink:0}
+.chat-row{display:flex;gap:8px;align-items:flex-end}
+.chat-textarea{flex:1;background:var(--card);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:13.5px;padding:10px 13px;resize:none;outline:none;font-family:inherit;line-height:1.5;max-height:100px;box-sizing:border-box}
+.chat-textarea:focus{border-color:var(--accent-border)}
+.send-btn{width:40px;height:40px;border-radius:10px;border:none;cursor:pointer;background:linear-gradient(135deg,var(--accent),#B8902A);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;transition:all .15s;color:#fff}
+.send-btn:disabled{background:var(--accent-dim);cursor:not-allowed}
+.chat-note{font-size:10.5px;color:var(--muted);margin-top:6px;text-align:center}
+.suggestions{margin-top:4px;display:flex;flex-direction:column;gap:6px}
+.suggestion-btn{display:block;width:100%;text-align:left;padding:9px 12px;background:var(--surface);border:1px solid var(--border);border-radius:9px;cursor:pointer;font-size:13px;color:var(--text);transition:all .15s;font-family:inherit}
+.suggestion-btn:hover{border-color:var(--accent-border);background:var(--accent-dim)}
+.err-msg{font-size:11px;color:var(--red);margin-top:6px}
+
+/* ===== ANALYZER ===== */
+.analyzer-wrap{padding:18px;display:flex;flex-direction:column;height:100%;box-sizing:border-box}
+.analyzer-desc{font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.6}
+.file-row{display:flex;gap:8px;margin-bottom:10px}
+.file-btn{font-size:12px;padding:6px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;cursor:pointer;color:var(--muted);font-family:inherit}
+.doc-textarea{flex:1;background:var(--card);border:1px solid var(--border);border-radius:12px;color:var(--text);font-size:13.5px;padding:14px 16px;resize:none;outline:none;font-family:Georgia,serif;line-height:1.75;min-height:160px;box-sizing:border-box}
+.doc-textarea:focus{border-color:var(--accent-border)}
+.char-count{font-size:11px;color:var(--muted);margin-top:5px}
+.analyze-btn{margin-top:14px;padding:14px;background:linear-gradient(135deg,#7B6CF6,#5A4ECC);color:#fff;border:none;border-radius:12px;cursor:pointer;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;font-family:inherit}
+.analyze-btn:disabled{background:var(--violet-dim);cursor:not-allowed}
+.result-wrap{overflow-y:auto;height:100%;padding:18px}
+.result-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.result-status{font-size:13px;font-weight:600;color:var(--green)}
+.back-btn{font-size:12px;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:5px 12px;cursor:pointer;font-family:inherit}
+.result-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.result-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 14px}
+.result-section{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:8px}
+.result-alerts{background:var(--red-dim);border:1px solid rgba(240,106,106,.15);border-radius:12px;padding:14px 16px;margin-bottom:8px}
+.result-rec{background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:12px;padding:14px 16px}
+.slabel{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px;color:var(--muted)}
+.slabel.accent{color:var(--accent)}
+.slabel.red{color:var(--red)}
+.slabel.violet{color:var(--violet)}
+
+/* ===== GENERATOR ===== */
+.gen-wrap{overflow-y:auto;height:100%;padding:18px}
+.type-btn{display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;padding:11px 14px;margin-bottom:7px;border-radius:10px;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13.5px;font-weight:400;transition:all .15s;font-family:inherit}
+.type-btn.active{border-color:var(--accent-border);background:var(--accent-dim);color:#fff;font-weight:600}
+.field-label{display:block;font-size:11.5px;font-weight:600;color:var(--muted);margin-bottom:5px}
+.field-input{width:100%;padding:10px 12px;background:var(--card);border:1px solid var(--border);border-radius:9px;color:var(--text);font-size:13.5px;outline:none;font-family:inherit;box-sizing:border-box;transition:border-color .15s}
+.field-input:focus{border-color:var(--accent-border)}
+.progress-bar{flex:1;height:3px;background:var(--card);border-radius:99px;overflow:hidden}
+.progress-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--violet));transition:width .3s}
+.gen-btn{width:100%;padding:14px;background:linear-gradient(135deg,var(--accent),#B8902A);color:#fff;border:none;border-radius:11px;cursor:pointer;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;font-family:inherit}
+.gen-btn:disabled{background:var(--accent-dim);cursor:not-allowed}
+.contract-text{flex:1;overflow-y:auto;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;white-space:pre-wrap;font-size:13.5px;line-height:1.85;color:var(--text);font-family:Georgia,serif}
+.warn-box{margin-top:12px;padding:10px 14px;background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:9px;font-size:12px;color:#D4B840;line-height:1.6}
+
+/* ===== JURISPRUDENCE ===== */
+.juris-search{padding:16px 18px;border-bottom:1px solid var(--border);background:var(--sidebar);flex-shrink:0}
+.search-row{display:flex;gap:8px;margin-bottom:10px}
+.search-input{flex:1;padding:10px 14px;background:var(--card);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:13.5px;outline:none;font-family:inherit;box-sizing:border-box}
+.search-input:focus{border-color:var(--accent-border)}
+.search-btn{padding:10px 16px;background:linear-gradient(135deg,var(--accent),#B8902A);color:#fff;border:none;border-radius:10px;cursor:pointer;font-size:13px;font-weight:700;display:flex;align-items:center;gap:7px;flex-shrink:0;white-space:nowrap;font-family:inherit}
+.search-btn:disabled{background:var(--accent-dim);cursor:not-allowed}
+.filter-row{display:flex;gap:8px;flex-wrap:wrap}
+.filter-select{padding:7px 10px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:12px;outline:none;font-family:inherit}
+.juris-results{flex:1;overflow-y:auto;padding:16px 18px}
+.juris-card{background:var(--card);border:1px solid var(--border);border-radius:13px;margin-bottom:10px;overflow:hidden;transition:border-color .2s}
+.juris-card.open{border-color:var(--accent-border)}
+.juris-header{padding:14px 16px;cursor:pointer;display:flex;align-items:flex-start;gap:12px}
+.juris-rel{font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px}
+.juris-rel.alta{background:rgba(201,168,76,.12);color:var(--accent);border:1px solid rgba(201,168,76,.25)}
+.juris-rel.media{background:rgba(78,201,192,.1);color:var(--teal);border:1px solid rgba(78,201,192,.2)}
+.juris-title{font-size:13.5px;font-weight:700;color:#fff;line-height:1.4;margin-bottom:4px}
+.juris-tema{font-size:12px;color:var(--muted)}
+.juris-year{font-size:10px;color:var(--muted)}
+.juris-body{padding:0 16px 16px;border-top:1px solid var(--border)}
+.mono{font-family:monospace;background:var(--surface);padding:6px 10px;border-radius:6px;display:inline-block;font-size:13px;color:var(--text)}
+.criterio-box{background:var(--accent-dim);border:1px solid var(--accent-border);border-radius:9px;padding:12px 14px}
+.criterio-text{margin:0;font-size:13.5px;color:#EDD98A;line-height:1.65;font-style:italic}
+.skeleton{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px;opacity:.5}
+.skel-line{background:var(--surface);border-radius:6px;margin-bottom:8px}
+.info-box{margin-top:8px;padding:10px 14px;background:rgba(123,108,246,.1);border:1px solid rgba(123,108,246,.2);border-radius:9px;font-size:12px;color:#AAA0F5;line-height:1.6}
+.err-box{padding:12px 16px;background:var(--red-dim);border:1px solid rgba(240,106,106,.2);border-radius:10px;font-size:13px;color:var(--red)}
+
+/* Spinner */
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .75s linear infinite}
+
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:99px}
+select option{background:#161622}
+</style>
+</head>
+<body>
+<div class="glow"></div>
+
+<!-- ===== LANDING ===== -->
+<div id="landing">
+<div class="wrap">
+  <div class="badge-row">
+    <div class="badge"><span class="badge-dot"></span>Sprint Intensivo · 4 Sesiones</div>
+  </div>
+
+  <div class="hero">
+    <span class="hero-emoji">🤖⚖️</span>
+    <h1><span class="l1">Certus</span><span class="l2">IA para Abogados</span></h1>
+    <p>Descubre cómo convertir Claude en una <strong>herramienta real de trabajo jurídico</strong>. Un sprint práctico diseñado para abogados que quieren usar IA para investigar, redactar, automatizar y optimizar su práctica profesional.</p>
+    <div class="sprint-tag">⚡ Domina el ecosistema Anthropic aplicado al Derecho</div>
+  </div>
+
+  <!-- Herramientas -->
+  <div class="div"><div class="div-line"></div><div class="div-label">🛠️ Herramientas disponibles</div><div class="div-line"></div></div>
+  <div class="tools-grid">
+    <a class="tool-card" href="#" onclick="openApp('chat');return false">
+      <span class="tool-icon">💬</span>
+      <div class="tool-name">Consulta Legal</div>
+      <div class="tool-desc">Asistente jurídico con IA para responder tus dudas legales al instante</div>
+      <div class="tool-arrow">Abrir →</div>
+    </a>
+    <a class="tool-card" href="#" onclick="openApp('analyzer');return false">
+      <span class="tool-icon">🔍</span>
+      <div class="tool-name">Analizador</div>
+      <div class="tool-desc">Analiza contratos, escrituras y demandas. Extrae cláusulas y alertas</div>
+      <div class="tool-arrow">Abrir →</div>
+    </a>
+    <a class="tool-card" href="#" onclick="openApp('generator');return false">
+      <span class="tool-icon">📝</span>
+      <div class="tool-name">Generador</div>
+      <div class="tool-desc">Redacta contratos profesionales en segundos con tus datos</div>
+      <div class="tool-arrow">Abrir →</div>
+    </a>
+    <a class="tool-card" href="#" onclick="openApp('juris');return false">
+      <span class="tool-icon">⚖️</span>
+      <div class="tool-name">Jurisprudencia</div>
+      <div class="tool-desc">Busca criterios jurisprudenciales por tema y país en segundos</div>
+      <div class="tool-arrow">Abrir →</div>
+    </a>
+  </div>
+
+  <!-- Módulos -->
+  <div class="div"><div class="div-line"></div><div class="div-label">📚 Programa — 4 sesiones</div><div class="div-line"></div></div>
+  <div class="modules">
+    <div class="module"><div class="mod-num">1</div><div><div class="mod-title">Ecosistema Claude para abogados</div><div class="mod-desc">Panorama completo de las herramientas de Anthropic aplicadas al trabajo jurídico.</div></div></div>
+    <div class="module"><div class="mod-num">2</div><div><div class="mod-title">Claude Chat avanzado</div><div class="mod-desc">Projects, Skills y Artifacts para investigación legal y redacción de contratos.</div></div></div>
+    <div class="module"><div class="mod-num">3</div><div><div class="mod-title">Automatización agéntica</div><div class="mod-desc">Cowork, Claude Code y Connectors para automatizar tareas del despacho.</div></div></div>
+    <div class="module"><div class="mod-num">4</div><div><div class="mod-title">Flujos de trabajo y mini apps legales</div><div class="mod-desc">Crea tus propias herramientas jurídicas sin necesidad de programar.</div></div></div>
+    <div class="hackathon"><div style="font-size:34px;margin-bottom:10px">⚡</div><div class="hackathon-title">Mini-Hackathon de cierre</div><div class="hackathon-desc">Aplica todo en un desafío práctico donde construirás tu propia solución legal con IA.</div></div>
+  </div>
+
+  <!-- Audiencia -->
+  <div class="div"><div class="div-line"></div><div class="div-label">🎯 ¿Para quién es?</div><div class="div-line"></div></div>
+  <div class="audience-grid">
+    <div class="audience-item"><span class="audience-emoji">⚖️</span><div class="audience-label">Abogados litigantes</div></div>
+    <div class="audience-item"><span class="audience-emoji">🏢</span><div class="audience-label">Abogados corporativos</div></div>
+    <div class="audience-item"><span class="audience-emoji">🏛️</span><div class="audience-label">In-house counsel</div></div>
+  </div>
+
+  <!-- Benefits -->
+  <div class="div"><div class="div-line"></div><div class="div-label">✅ Qué lograrás</div><div class="div-line"></div></div>
+  <div class="benefits">
+    <div class="benefit"><div class="benefit-icon">🔍</div><div class="benefit-text">Investiga jurisprudencia con mayor velocidad y precisión</div></div>
+    <div class="benefit"><div class="benefit-icon">✍️</div><div class="benefit-text">Redacta contratos y escritos con entregables de mayor calidad</div></div>
+    <div class="benefit"><div class="benefit-icon">⚙️</div><div class="benefit-text">Automatiza tareas repetitivas y libera tiempo para trabajo de alto valor</div></div>
+    <div class="benefit"><div class="benefit-icon">🚀</div><div class="benefit-text">Integra IA en tu práctica con enfoque práctico desde el día 1</div></div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta">
+    <h2>¿Listo para transformar tu práctica legal?</h2>
+    <p>Únete al sprint y aprende a trabajar con inteligencia artificial de forma real, no teórica.</p>
+    <button class="cta-btn" onclick="openApp('chat')">Acceder a Certus →</button>
+    <div class="cta-note">🎯 Enfoque 100% práctico · Cupo limitado</div>
+  </div>
+
+  <div class="footer">© 2026 · Certus IA para Abogados · Powered by Anthropic</div>
+</div>
+</div>
+
+<!-- ===== APP ===== -->
+<div id="app">
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">⚖️</div>
+      <div><div class="logo-name">Certus</div><div class="logo-sub">IA para Abogados</div></div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-label">Herramientas</div>
+      <button class="nav-btn active" id="nav-chat" onclick="switchTool('chat')"><span class="nav-icon">💬</span><div><div class="nav-title">Consulta Legal</div><div class="nav-sub">Asistente Certus</div></div></button>
+      <button class="nav-btn" id="nav-analyzer" onclick="switchTool('analyzer')"><span class="nav-icon">🔍</span><div><div class="nav-title">Analizador</div><div class="nav-sub">Documentos legales</div></div></button>
+      <button class="nav-btn" id="nav-generator" onclick="switchTool('generator')"><span class="nav-icon">📝</span><div><div class="nav-title">Generador</div><div class="nav-sub">Contratos</div></div></button>
+      <button class="nav-btn" id="nav-juris" onclick="switchTool('juris')"><span class="nav-icon">⚖️</span><div><div class="nav-title">Jurisprudencia</div><div class="nav-sub">Buscador de criterios</div></div></button>
+      <button class="nav-btn" style="margin-top:12px" onclick="closApp()"><span class="nav-icon">🏠</span><div><div class="nav-title" style="color:var(--muted)">Inicio</div><div class="nav-sub">Volver al inicio</div></div></button>
+    </div>
+    <div class="sidebar-footer">Powered by Claude<br><span style="color:rgba(255,255,255,.15)">Uso orientativo</span></div>
+  </div>
+  <div class="main">
+    <div class="topbar">
+      <span class="topbar-icon" id="tb-icon">💬</span>
+      <div><div class="topbar-title" id="tb-title">Consulta Legal</div><div class="topbar-sub" id="tb-sub">Asistente Certus</div></div>
+      <div class="status"><div class="status-dot"></div><span class="status-label">Claude activo</span></div>
+    </div>
+    <div class="tool-area" id="tool-area">
+      <!-- Injected by JS -->
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== API =====
+const API_URL = '/api/chat';
+
+async function callClaude(messages, system) {
+  const body = { messages };
+  if (system) body.system = system;
+  const res = await fetch(API_URL, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err?.error?.message || 'HTTP ' + res.status);
+  }
+  const data = await res.json();
+  return data.content?.map(b => b.text || '').join('') || '';
+}
+
+// ===== NAV =====
+let currentTool = 'chat';
+
+function openApp(tool) {
+  document.getElementById('landing').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  switchTool(tool || 'chat');
+}
+
+function closApp() {
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('landing').style.display = 'block';
+}
+
+const TOOLS_META = {
+  chat:     { icon:'💬', title:'Consulta Legal',  sub:'Asistente Certus' },
+  analyzer: { icon:'🔍', title:'Analizador',      sub:'Documentos legales' },
+  generator:{ icon:'📝', title:'Generador',        sub:'Contratos' },
+  juris:    { icon:'⚖️', title:'Jurisprudencia',   sub:'Buscador de criterios' },
+};
+
+function switchTool(tool) {
+  currentTool = tool;
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  const nb = document.getElementById('nav-' + tool);
+  if (nb) nb.classList.add('active');
+  const m = TOOLS_META[tool];
+  document.getElementById('tb-icon').textContent  = m.icon;
+  document.getElementById('tb-title').textContent = m.title;
+  document.getElementById('tb-sub').textContent   = m.sub;
+  const area = document.getElementById('tool-area');
+  area.innerHTML = '';
+  if (tool === 'chat')      renderChat(area);
+  if (tool === 'analyzer')  renderAnalyzer(area);
+  if (tool === 'generator') renderGenerator(area);
+  if (tool === 'juris')     renderJuris(area);
+}
+
+// ===== CHAT =====
+const CHAT_SYS = 'Eres Certus, asistente jurídico experto en derecho latinoamericano. Responde en español, claro y profesional. Tus respuestas son orientativas. Máximo 4-5 párrafos.';
+const SUGERENCIAS = [
+  '¿Qué elementos debe tener un contrato de arrendamiento válido?',
+  '¿Cuáles son mis derechos si me despiden sin causa?',
+  '¿Qué es una cláusula de penalidad y cuándo es válida?',
+  '¿Diferencia entre SAS y SA?',
+  '¿Qué hacer si un cliente no paga una factura?'
+];
+let chatHistory = [{ role:'assistant', content:'Hola, soy **Certus** ⚖️, tu asistente jurídico con IA. ¿En qué puedo ayudarte hoy?' }];
+
+function fmt(t) { return t.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br/>'); }
+
+function renderChat(area) {
+  area.style.overflow = 'hidden';
+  area.style.display  = 'flex';
+  area.style.flexDirection = 'column';
+  area.innerHTML = `
+    <div class="chat-messages" id="chat-msgs"></div>
+    <div class="chat-input-area">
+      <div class="chat-row">
+        <textarea class="chat-textarea" id="chat-input" rows="1" placeholder="Escribe tu consulta legal... (Enter para enviar)"></textarea>
+        <button class="send-btn" id="send-btn" onclick="sendChat()">↑</button>
+      </div>
+      <div id="chat-err" class="err-msg"></div>
+      <div class="chat-note">Orientativo · No reemplaza asesoría legal profesional</div>
+    </div>`;
+  renderMessages();
+  const inp = document.getElementById('chat-input');
+  inp.addEventListener('keydown', e => { if (e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); sendChat(); }});
+}
+
+function renderMessages() {
+  const el = document.getElementById('chat-msgs');
+  if (!el) return;
+  el.innerHTML = '';
+  chatHistory.forEach(m => {
+    const row = document.createElement('div');
+    row.className = 'msg-row ' + m.role;
+    if (m.role==='assistant') {
+      row.innerHTML = `<div class="msg-avatar ai">⚖️</div><div class="msg-bubble ai">${fmt(m.content)}</div>`;
+    } else {
+      row.innerHTML = `<div class="msg-bubble user">${fmt(m.content)}</div><div class="msg-avatar user">👤</div>`;
+    }
+    el.appendChild(row);
+  });
+  if (chatHistory.length===1) {
+    const sg = document.createElement('div');
+    sg.className='suggestions';
+    sg.innerHTML='<div class="nav-label" style="padding:0">Consultas frecuentes</div>';
+    SUGERENCIAS.forEach(s=>{
+      const b=document.createElement('button');
+      b.className='suggestion-btn';
+      b.textContent=s;
+      b.onclick=()=>sendChat(s);
+      sg.appendChild(b);
+    });
+    el.appendChild(sg);
+  }
+  el.scrollTop=el.scrollHeight;
+}
+
+async function sendChat(text) {
+  const inp=document.getElementById('chat-input');
+  const msg=(text||inp?.value||'').trim();
+  if(!msg) return;
+  if(inp) inp.value='';
+  document.getElementById('chat-err').textContent='';
+  chatHistory.push({role:'user',content:msg});
+  renderMessages();
+  // typing
+  const el=document.getElementById('chat-msgs');
+  const typing=document.createElement('div');
+  typing.className='msg-row assistant';
+  typing.id='typing';
+  typing.innerHTML=`<div class="msg-avatar ai">⚖️</div><div class="typing"><div class="typing-dot" style="animation:bounce 1.2s 0s infinite"></div><div class="typing-dot" style="animation:bounce 1.2s .2s infinite"></div><div class="typing-dot" style="animation:bounce 1.2s .4s infinite"></div></div>`;
+  el.appendChild(typing);
+  el.scrollTop=el.scrollHeight;
+  const btn=document.getElementById('send-btn');
+  if(btn) btn.disabled=true;
+  try {
+    const reply=await callClaude(chatHistory.map(m=>({role:m.role,content:m.content})),CHAT_SYS);
+    chatHistory.push({role:'assistant',content:reply});
+  } catch(e) {
+    chatHistory.push({role:'assistant',content:'⚠️ Error: '+e.message});
+    document.getElementById('chat-err').textContent=e.message;
+  } finally {
+    document.getElementById('typing')?.remove();
+    if(btn) btn.disabled=false;
+    renderMessages();
+    setTimeout(()=>document.getElementById('chat-input')?.focus(),80);
+  }
+}
+
+// ===== ANALYZER =====
+const ANALYZER_SYS=`Eres un experto en análisis de documentos legales. Responde ÚNICAMENTE con JSON válido sin backticks: {"tipo":"string","resumen":"string","partes":["string"],"clausulas_clave":[{"titulo":"string","descripcion":"string"}],"alertas":["string"],"fecha":"string","recomendacion":"string"}`;
+
+function renderAnalyzer(area) {
+  area.style.overflow='hidden';
+  area.style.display='flex';
+  area.style.flexDirection='column';
+  area.innerHTML=`<div class="analyzer-wrap"><p class="analyzer-desc">Pega el texto de cualquier contrato, escritura o demanda. Certus extrae partes, cláusulas, alertas y recomendaciones.</p><div class="file-row"><button class="file-btn" onclick="document.getElementById('file-in').click()">📄 Subir .txt</button><input id="file-in" type="file" accept=".txt,.md" style="display:none" onchange="loadFile(this)"><button class="file-btn" onclick="document.getElementById('doc-text').value='';updateChar()">Limpiar</button></div><textarea class="doc-textarea" id="doc-text" placeholder="Pega aquí el texto del documento legal..." oninput="updateChar()"></textarea><div class="char-count" id="char-count"></div><div id="ana-err" class="err-msg" style="margin-top:8px"></div><button class="analyze-btn" id="ana-btn" onclick="runAnalyze()">⚖️ Analizar documento</button></div>`;
+}
+
+function loadFile(inp) {
+  const f=inp.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=e=>{document.getElementById('doc-text').value=e.target.result;updateChar();};
+  r.readAsText(f);
+}
+function updateChar() {
+  const t=document.getElementById('doc-text')?.value||'';
+  const c=document.getElementById('char-count');
+  if(c) c.textContent=t.length>0?t.length.toLocaleString()+' caracteres':'';
+}
+
+async function runAnalyze() {
+  const text=document.getElementById('doc-text')?.value.trim()||'';
+  if(text.length<50){document.getElementById('ana-err').textContent='Ingresa al menos 50 caracteres.';return;}
+  document.getElementById('ana-err').textContent='';
+  const btn=document.getElementById('ana-btn');
+  btn.disabled=true;
+  btn.innerHTML='<span class="spinner"></span> Analizando...';
+  try {
+    const raw=await callClaude([{role:'user',content:`Analiza este documento legal:\n\n${text.slice(0,8000)}`}],ANALYZER_SYS);
+    const result=JSON.parse(raw.replace(/```json|```/g,'').trim());
+    showAnalysisResult(result);
+  } catch(e) {document.getElementById('ana-err').textContent='Error: '+e.message;}
+  finally {if(btn){btn.disabled=false;btn.innerHTML='⚖️ Analizar documento';}}
+}
+
+function showAnalysisResult(r) {
+  const area=document.getElementById('tool-area');
+  area.innerHTML=`<div class="result-wrap">
+    <div class="result-top"><span class="result-status">● Análisis completado</span><button class="back-btn" onclick="switchTool('analyzer')">← Nuevo</button></div>
+    <div class="result-grid">
+      <div class="result-card"><div class="slabel">Tipo</div><div style="font-size:14px;font-weight:600;color:#fff">${r.tipo}</div></div>
+      <div class="result-card"><div class="slabel">Fecha</div><div style="font-size:14px;font-weight:600;color:#fff">${r.fecha}</div></div>
+    </div>
+    <div class="result-section"><div class="slabel">📋 Resumen</div><p style="margin:0;font-size:13.5px;line-height:1.75;color:var(--text)">${r.resumen}</p></div>
+    <div class="result-section"><div class="slabel">👥 Partes</div>${(r.partes||[]).map((p,i)=>`<div style="display:flex;gap:8px;align-items:center;margin-bottom:5px"><span style="width:20px;height:20px;border-radius:50%;background:var(--violet-dim);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--violet);flex-shrink:0">${i+1}</span><span style="font-size:13.5px;color:var(--text)">${p}</span></div>`).join('')}</div>
+    <div class="result-section"><div class="slabel">📌 Cláusulas clave</div>${(r.clausulas_clave||[]).map(c=>`<div style="padding-left:12px;border-left:2px solid rgba(123,108,246,.35);margin-bottom:10px"><div style="font-size:12px;font-weight:700;color:var(--violet);margin-bottom:2px">${c.titulo}</div><div style="font-size:13px;color:var(--muted);line-height:1.6">${c.descripcion}</div></div>`).join('')}</div>
+    ${r.alertas?.length?`<div class="result-alerts"><div class="slabel red">⚠️ Alertas</div>${r.alertas.map(a=>`<div style="font-size:13px;color:#EFA0A0;line-height:1.6;margin-bottom:4px">▸ ${a}</div>`).join('')}</div>`:''}
+    <div class="result-rec"><div class="slabel accent">💡 Recomendación</div><p style="margin:0;font-size:13.5px;color:#EDD98A;line-height:1.7">${r.recomendacion}</p></div>
+  </div>`;
+}
+
+// ===== GENERATOR =====
+const CTYPES=[{id:'arrendamiento',label:'🏠 Arrendamiento'},{id:'servicios',label:'💼 Prestación de Servicios'},{id:'confidencialidad',label:'🔒 Confidencialidad (NDA)'},{id:'compraventa',label:'🤝 Compraventa'},{id:'laboral',label:'👷 Contrato Laboral'}];
+const CFIELDS={
+  arrendamiento:[{id:'arrendador',l:'Arrendador',p:'Juan García Pérez'},{id:'arrendatario',l:'Arrendatario',p:'María López Torres'},{id:'inmueble',l:'Inmueble',p:'Depto 301, Av. Reforma 123'},{id:'renta',l:'Renta mensual',p:'$15,000 MXN'},{id:'duracion',l:'Duración',p:'12 meses'},{id:'deposito',l:'Depósito',p:'$30,000 MXN'},{id:'pais',l:'País',p:'México'}],
+  servicios:[{id:'prestador',l:'Prestador',p:'Ana Martínez'},{id:'cliente',l:'Cliente',p:'Empresa XYZ S.A.'},{id:'servicio',l:'Servicio',p:'Consultoría legal'},{id:'honorarios',l:'Honorarios',p:'$50,000 MXN/mes'},{id:'duracion',l:'Duración',p:'6 meses'},{id:'pais',l:'País',p:'Colombia'}],
+  confidencialidad:[{id:'parte1',l:'Divulgante',p:'TechStartup S.A.S.'},{id:'parte2',l:'Receptora',p:'Inversionista ABC'},{id:'objeto',l:'Info confidencial',p:'Planes de negocio, tecnología'},{id:'duracion',l:'Duración',p:'3 años'},{id:'proposito',l:'Propósito',p:'Evaluación de inversión'},{id:'pais',l:'País',p:'Argentina'}],
+  compraventa:[{id:'vendedor',l:'Vendedor',p:'Carlos Ruiz'},{id:'comprador',l:'Comprador',p:'Sofía Castro'},{id:'bien',l:'Bien',p:'Toyota Corolla 2022'},{id:'precio',l:'Precio',p:'$250,000 MXN'},{id:'forma_pago',l:'Forma de pago',p:'50% al firmar, 50% en 30 días'},{id:'pais',l:'País',p:'México'}],
+  laboral:[{id:'empleador',l:'Empleador',p:'Empresa ABC S.A.'},{id:'empleado',l:'Empleado',p:'Roberto Díaz'},{id:'puesto',l:'Puesto',p:'Gerente de Ventas'},{id:'salario',l:'Salario',p:'$35,000 MXN'},{id:'jornada',l:'Jornada',p:'Lun-Vie 9-18 hrs'},{id:'inicio',l:'Inicio',p:'1 junio 2025'},{id:'pais',l:'País',p:'México'}],
+};
+let genTipo=null;
+
+function renderGenerator(area) {
+  genTipo=null;
+  area.style.overflow='hidden';
+  area.style.display='flex';
+  area.style.flexDirection='column';
+  area.innerHTML=`<div class="gen-wrap" id="gen-wrap">${renderGenContent()}</div>`;
+}
+
+function renderGenContent() {
+  const fields=genTipo?CFIELDS[genTipo]:[];
+  const filled=fields.filter(f=>{const el=document.getElementById('gf-'+f.id);return el&&el.value.trim();}).length;
+  return `
+    <div style="margin-bottom:18px">
+      <div class="slabel" style="margin-bottom:10px">1 · Tipo de contrato</div>
+      ${CTYPES.map(t=>`<button class="type-btn ${genTipo===t.id?'active':''}" onclick="selectTipo('${t.id}')">${t.label}${genTipo===t.id?'<span style="color:var(--accent)">✓</span>':''}</button>`).join('')}
+    </div>
+    ${genTipo?`
+    <div>
+      <div class="slabel" style="margin-bottom:10px">2 · Datos del contrato</div>
+      ${CFIELDS[genTipo].map(f=>`<div style="margin-bottom:10px"><label class="field-label">${f.l}</label><input id="gf-${f.id}" class="field-input" placeholder="${f.p}" oninput="updateProgress()"/></div>`).join('')}
+      <div style="display:flex;align-items:center;gap:10px;margin:14px 0">
+        <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+        <span style="font-size:11px;color:var(--muted);flex-shrink:0" id="prog-label">0/${fields.length}</span>
+      </div>
+      <button class="gen-btn" id="gen-btn" onclick="runGenerate()" disabled>📝 Generar contrato</button>
+    </div>`:''}`;
+}
+
+function selectTipo(id) {
+  genTipo=id;
+  const wrap=document.getElementById('gen-wrap');
+  if(wrap) wrap.innerHTML=renderGenContent();
+}
+
+function updateProgress() {
+  const fields=genTipo?CFIELDS[genTipo]:[];
+  const filled=fields.filter(f=>{const el=document.getElementById('gf-'+f.id);return el&&el.value.trim();}).length;
+  const pct=fields.length?((filled/fields.length)*100):0;
+  const fill=document.getElementById('prog-fill');
+  const lbl=document.getElementById('prog-label');
+  const btn=document.getElementById('gen-btn');
+  if(fill) fill.style.width=pct+'%';
+  if(lbl) lbl.textContent=filled+'/'+fields.length;
+  if(btn) btn.disabled=(filled<fields.length);
+}
+
+async function runGenerate() {
+  const fields=CFIELDS[genTipo];
+  const label=CTYPES.find(t=>t.id===genTipo)?.label||genTipo;
+  const details=fields.map(f=>`${f.l}: ${document.getElementById('gf-'+f.id)?.value}`).join('\n');
+  const prompt=`Genera un ${label} profesional en español latinoamericano con:\n${details}\n\nFecha: ${new Date().toLocaleDateString('es-MX',{year:'numeric',month:'long',day:'numeric'})}.\nIncluye cláusulas estándar numeradas y espacios para firma. Solo el texto del contrato.`;
+  const btn=document.getElementById('gen-btn');
+  btn.disabled=true;
+  btn.innerHTML='<span class="spinner"></span> Redactando...';
+  try {
+    const text=await callClaude([{role:'user',content:prompt}]);
+    showContract(text);
+  } catch(e) {
+    btn.disabled=false;
+    btn.innerHTML='📝 Generar contrato';
+    alert('Error: '+e.message);
+  }
+}
+
+function showContract(text) {
+  const area=document.getElementById('tool-area');
+  area.innerHTML=`<div style="display:flex;flex-direction:column;height:100%;padding:18px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <span class="result-status">● Contrato generado</span>
+      <div style="display:flex;gap:8px">
+        <button class="back-btn" onclick="navigator.clipboard.writeText(document.getElementById('contract-out').textContent);this.textContent='✓ Copiado';setTimeout(()=>this.textContent='Copiar',2000)">Copiar</button>
+        <button class="back-btn" onclick="switchTool('generator')">← Nuevo</button>
+      </div>
+    </div>
+    <div class="contract-text" id="contract-out">${text}</div>
+    <div class="warn-box">⚠️ Borrador orientativo. Revisa con un abogado antes de firmar.</div>
+  </div>`;
+}
+
+// ===== JURISPRUDENCE =====
+const JURIS_SYS=`Eres experto en jurisprudencia latinoamericana. Responde ÚNICAMENTE con JSON válido sin backticks: {"resultados":[{"titulo":"string","tribunal":"string","pais":"string","año":"string","numero":"string","tema":"string","resumen":"string","criterio":"string","relevancia":"alta|media"}],"nota":"string"}. Devuelve 3-5 resultados reales o representativos.`;
+const PAISES=['México','Colombia','Argentina','Chile','Perú','Ecuador','Venezuela','Uruguay','Bolivia','Paraguay','Guatemala','Costa Rica','Panamá','España'];
+const AREAS=['Derecho Civil','Derecho Laboral','Derecho Mercantil','Derecho Penal','Derecho Administrativo','Derecho Constitucional','Derecho Familiar','Derecho Fiscal','Propiedad Intelectual'];
+const JURIS_EX=['Despido injustificado y liquidación','Cláusula penal excesiva en contratos','Responsabilidad civil extracontractual','Nulidad de contratos','Derechos del consumidor'];
+let jurisExpanded=null;
+
+function renderJuris(area) {
+  area.style.overflow='hidden';
+  area.style.display='flex';
+  area.style.flexDirection='column';
+  area.innerHTML=`
+    <div class="juris-search">
+      <div class="search-row">
+        <input class="search-input" id="juris-input" placeholder="Ej: despido injustificado, cláusula penal..." onkeydown="if(event.key==='Enter')runJurisSearch()"/>
+        <button class="search-btn" id="juris-btn" onclick="runJurisSearch()">🔎 Buscar</button>
+      </div>
+      <div class="filter-row">
+        <select class="filter-select" id="juris-pais">${PAISES.map(p=>`<option${p==='México'?' selected':''}>${p}</option>`).join('')}</select>
+        <select class="filter-select" id="juris-area"><option value="">Todas las áreas</option>${AREAS.map(a=>`<option>${a}</option>`).join('')}</select>
+        <button class="file-btn" id="juris-clear" style="display:none" onclick="clearJuris()">Limpiar</button>
+      </div>
+    </div>
+    <div class="juris-results" id="juris-results">
+      <p style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.6">Busca criterios jurisprudenciales por tema y país.</p>
+      <div class="slabel">Búsquedas frecuentes</div>
+      ${JURIS_EX.map(ex=>`<button class="suggestion-btn" onclick="quickJuris('${ex}')" style="margin-bottom:7px">🔎 ${ex}</button>`).join('')}
+    </div>`;
+}
+
+function quickJuris(ex) {
+  document.getElementById('juris-input').value=ex;
+  runJurisSearch();
+}
+
+async function runJurisSearch() {
+  const term=document.getElementById('juris-input')?.value.trim()||'';
+  if(!term) return;
+  const pais=document.getElementById('juris-pais')?.value||'México';
+  const area=document.getElementById('juris-area')?.value||'';
+  const btn=document.getElementById('juris-btn');
+  const res=document.getElementById('juris-results');
+  btn.disabled=true;
+  btn.innerHTML='<span class="spinner"></span> Buscando...';
+  res.innerHTML=[1,2,3].map(()=>`<div class="skeleton"><div class="skel-line" style="height:12px;width:60%"></div><div class="skel-line" style="height:10px;width:40%"></div><div class="skel-line" style="height:10px;width:85%"></div></div>`).join('');
+  const prompt=`Busca jurisprudencia sobre: "${term}"\nPaís: ${pais}${area?'\nÁrea: '+area:''}\nDevuelve resultados reales o representativos.`;
+  try {
+    const raw=await callClaude([{role:'user',content:prompt}],JURIS_SYS);
+    const data=JSON.parse(raw.replace(/```json|```/g,'').trim());
+    showJurisResults(data,pais,area);
+    document.getElementById('juris-clear').style.display='';
+  } catch(e) {
+    res.innerHTML=`<div class="err-box">Error: ${e.message}</div>`;
+  } finally {
+    btn.disabled=false;
+    btn.innerHTML='🔎 Buscar';
+  }
+}
+
+function clearJuris() {
+  document.getElementById('juris-input').value='';
+  document.getElementById('juris-clear').style.display='none';
+  const res=document.getElementById('juris-results');
+  res.innerHTML=`<p style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.6">Busca criterios jurisprudenciales por tema y país.</p><div class="slabel">Búsquedas frecuentes</div>${JURIS_EX.map(ex=>`<button class="suggestion-btn" onclick="quickJuris('${ex}')" style="margin-bottom:7px">🔎 ${ex}</button>`).join('')}`;
+}
+
+function showJurisResults(data, pais, area) {
+  jurisExpanded=null;
+  const res=document.getElementById('juris-results');
+  res.innerHTML=`
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <span class="result-status">● ${data.resultados?.length} resultados · ${pais}</span>
+      ${area?`<span style="font-size:11px;color:var(--muted);background:var(--card);padding:3px 10px;border-radius:99px;border:1px solid var(--border)">${area}</span>`:''}
+    </div>
+    ${(data.resultados||[]).map((r,i)=>`
+      <div class="juris-card" id="jcard-${i}">
+        <div class="juris-header" onclick="toggleJuris(${i})">
+          <div style="flex:1">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:wrap">
+              <span class="juris-rel ${r.relevancia}">${r.relevancia==='alta'?'Alta relevancia':'Relevancia media'}</span>
+              <span class="juris-year">${r.año} · ${r.tribunal}</span>
+            </div>
+            <div class="juris-title">${r.titulo}</div>
+            <div class="juris-tema">${r.tema}</div>
+          </div>
+          <span style="color:var(--muted);font-size:14px;flex-shrink:0;transition:transform .2s" id="jarr-${i}">▾</span>
+        </div>
+        <div class="juris-body" id="jbody-${i}" style="display:none">
+          <div style="padding-top:14px;display:flex;flex-direction:column;gap:12px">
+            <div><div class="slabel">Expediente / Registro</div><div class="mono">${r.numero}</div></div>
+            <div><div class="slabel">Resumen</div><p style="margin:0;font-size:13.5px;color:var(--text);line-height:1.7">${r.resumen}</p></div>
+            <div class="criterio-box"><div class="slabel accent">Criterio establecido</div><p class="criterio-text">"${r.criterio}"</p></div>
+          </div>
+        </div>
+      </div>`).join('')}
+    ${data.nota?`<div class="info-box">ℹ️ ${data.nota}</div>`:''}`;
+}
+
+function toggleJuris(i) {
+  const body=document.getElementById('jbody-'+i);
+  const arr=document.getElementById('jarr-'+i);
+  const card=document.getElementById('jcard-'+i);
+  const isOpen=body.style.display!=='none';
+  body.style.display=isOpen?'none':'block';
+  arr.style.transform=isOpen?'rotate(0deg)':'rotate(180deg)';
+  card.classList.toggle('open',!isOpen);
+}
+
+// Init
+switchTool('chat');
+</script>
+</body>
+</html>
